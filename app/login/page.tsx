@@ -43,7 +43,7 @@ export default function LoginPage() {
             Empowering Seafarers Through Seamless Documentation
           </p>
           <div className="w-20 h-0.5 bg-[#D4AF37] mx-auto mt-4"></div>
-          <p className="text-gray-400 text-sm mt-4">Sistem Monitoring Dokumen Pelaut</p>
+          <p className="text-gray-400 text-sm mt-4">SharePoint Document</p>
         </div>
 
         <form onSubmit={handleSubmit}>
