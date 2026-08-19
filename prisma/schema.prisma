@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  role          Role     @default(user)
+  namaPerusahaan String? @map("nama_perusahaan")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  createdBy     String?  @map("created_by")
+  
+  createdByUser User?    @relation("UserCreated", fields: [createdBy], references: [id])
+  createdUsers  User[]   @relation("UserCreated")
+  updatedE_SID  E_SID[]  @relation("UpdatedE_SID")
+  updatedBukuPelaut BukuPelaut[] @relation("UpdatedBukuPelaut")
+  updatedVISA   VISA[]   @relation("UpdatedVISA")
+  
+  accounts      Account[]
+  sessions      Session[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum Role {
+  super_admin
+  admin
+  user
+}
+
+model Pelaut {
+  id         String   @id @default(cuid())
+  nama       String
+  kodePelaut String   @unique @map("kode_pelaut")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  
+  e_sid      E_SID?
+  bukuPelaut BukuPelaut?
+  visa       VISA[]
+  
+  @@map("pelaut")
+}
+
+model E_SID {
+  id              String   @id @default(cuid())
+  pelautId        String   @unique @map("pelaut_id")
+  lokasiPembuatan Lokasi   @map("lokasi_pembuatan")
+  status          StatusSID
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  updatedBy       String   @map("updated_by")
+  
+  pelaut Pelaut @relation(fields: [pelautId], references: [id])
+  user   User   @relation("UpdatedE_SID", fields: [updatedBy], references: [id])
+  
+  @@map("e_sid")
+}
+
+enum Lokasi {
+  Jakarta
+  Surabaya
+}
+
+enum StatusSID {
+  Proses
+  Approval
+  Tanggal_Foto @map("Tanggal Foto")
+  Issued
+}
+
+model BukuPelaut {
+  id              String   @id @default(cuid())
+  pelautId        String   @unique @map("pelaut_id")
+  keteranganOrder KeteranganOrder @map("keterangan_order")
+  status          StatusBuku
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  updatedBy       String   @map("updated_by")
+  
+  pelaut Pelaut @relation(fields: [pelautId], references: [id])
+  user   User   @relation("UpdatedBukuPelaut", fields: [updatedBy], references: [id])
+  
+  @@map("buku_pelaut")
+}
+
+enum KeteranganOrder {
+  Sijil_On @map("Sijil On")
+  Sijil_Off @map("Sijil Off")
+  Sijil_On_Off @map("Sijil On Off")
+  Perpanjang
+  Pergantian
+}
+
+enum StatusBuku {
+  Proses
+  Dijalankan
+  Issued
+}
+
+model VISA {
+  id            String   @id @default(cuid())
+  pelautId      String   @map("pelaut_id")
+  kodePasspor   String   @map("kode_passpor")
+  negaraTujuan  String   @map("negara_tujuan")
+  status        StatusVISA
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  updatedBy     String   @map("updated_by")
+  
+  pelaut Pelaut @relation(fields: [pelautId], references: [id])
+  user   User   @relation("UpdatedVISA", fields: [updatedBy], references: [id])
+  
+  @@map("visa")
+}
+
+enum StatusVISA {
+  Upload_Dokumen @map("Upload Dokumen")
+  Apply_VISA @map("Apply VISA")
+  Proses_Embassy @map("Proses oleh Embassy")
+  Issued
+}
