@@ -1,18 +1,8 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { User } from "next-auth";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -23,7 +13,7 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials): Promise<User | null> {
+      async authorize(credentials): Promise<any> {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
@@ -47,7 +37,7 @@ export const authOptions = {
           email: user.email,
           role: user.role,
           namaPerusahaan: user.namaPerusahaan,
-        } as User;
+        };
       }
     })
   ],

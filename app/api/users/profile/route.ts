@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 // PUT - Update username dan password Super Admin
 export async function PUT(request: NextRequest) {
