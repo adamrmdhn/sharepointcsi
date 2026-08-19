@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // PUT - Update E-SID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,7 +18,6 @@ export async function PUT(
     const body = await request.json();
     const { namaPelaut, kodePelaut, lokasiPembuatan, status } = body;
 
-    // Cari E-SID yang akan diupdate
     const existingESID = await prisma.e_SID.findUnique({
       where: { id },
       include: { pelaut: true },
@@ -31,7 +30,6 @@ export async function PUT(
       );
     }
 
-    // Update data pelaut
     await prisma.pelaut.update({
       where: { id: existingESID.pelautId },
       data: {
@@ -40,7 +38,6 @@ export async function PUT(
       },
     });
 
-    // Update E-SID
     const updatedESID = await prisma.e_SID.update({
       where: { id },
       data: {
@@ -66,7 +63,7 @@ export async function PUT(
 // DELETE - Hapus E-SID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -76,7 +73,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Cek apakah E-SID ada
     const existingESID = await prisma.e_SID.findUnique({
       where: { id },
     });
@@ -88,7 +84,6 @@ export async function DELETE(
       );
     }
 
-    // Hapus E-SID
     await prisma.e_SID.delete({
       where: { id },
     });
