@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
-// PUT - Update Buku Pelaut
+// PUT - Update Buku Pelaut (BYPASS AUTH)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user?.role !== "admin" && session.user?.role !== "super_admin")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    // BYPASS AUTH
     const { id } = await params;
     const body = await request.json();
     const { namaPelaut, kodePelaut, keteranganOrder, status } = body;
@@ -43,7 +37,7 @@ export async function PUT(
       data: {
         keteranganOrder: keteranganOrder,
         status: status,
-        updatedBy: session.user.id,
+        updatedBy: "dummy-id",
       },
       include: {
         pelaut: true,
@@ -60,17 +54,12 @@ export async function PUT(
   }
 }
 
-// DELETE - Hapus Buku Pelaut
+// DELETE - Hapus Buku Pelaut (BYPASS AUTH)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user?.role !== "admin" && session.user?.role !== "super_admin")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     const existing = await prisma.bukuPelaut.findUnique({

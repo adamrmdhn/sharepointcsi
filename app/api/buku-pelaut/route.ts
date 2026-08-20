@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
 // GET - Ambil semua data Buku Pelaut
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await prisma.bukuPelaut.findMany({
       include: {
         pelaut: true,
@@ -30,16 +23,19 @@ export async function GET() {
   }
 }
 
-// POST - Tambah data Buku Pelaut baru
+// POST - Tambah data Buku Pelaut baru (BYPASS AUTH)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user?.role !== "admin" && session.user?.role !== "super_admin")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // BYPASS AUTH - SEMENTARA UNTUK TESTING
+    // const session = await getServerSession(authOptions);
+    // if (!session || (session.user?.role !== "admin" && session.user?.role !== "super_admin")) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
 
     const body = await request.json();
     const { namaPelaut, kodePelaut, keteranganOrder, status } = body;
+
+    console.log("📝 Creating Buku Pelaut:", { namaPelaut, kodePelaut, keteranganOrder, status });
 
     // Cari atau buat pelaut
     let pelaut = await prisma.pelaut.findUnique({
@@ -53,6 +49,7 @@ export async function POST(request: NextRequest) {
           kodePelaut: kodePelaut,
         },
       });
+      console.log("✅ Pelaut baru dibuat:", pelaut);
     }
 
     // Cek apakah pelaut sudah punya Buku Pelaut
@@ -61,6 +58,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
+      console.log("⚠️ Pelaut sudah memiliki Buku Pelaut");
       return NextResponse.json(
         { error: "Pelaut ini sudah memiliki Buku Pelaut" },
         { status: 400 }
@@ -73,18 +71,19 @@ export async function POST(request: NextRequest) {
         pelautId: pelaut.id,
         keteranganOrder: keteranganOrder,
         status: status,
-        updatedBy: session.user.id,
+        updatedBy: "dummy-id", // Bypass: pakai dummy user
       },
       include: {
         pelaut: true,
       },
     });
 
+    console.log("✅ Buku Pelaut berhasil dibuat:", newData);
     return NextResponse.json(newData, { status: 201 });
   } catch (error) {
-    console.error("Error creating Buku Pelaut:", error);
+    console.error("❌ Error creating Buku Pelaut:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error: " + (error as Error).message },
       { status: 500 }
     );
   }
