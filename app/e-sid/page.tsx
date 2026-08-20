@@ -208,7 +208,7 @@ export default function ESIDPage() {
             <option value="">Semua Status</option>
             <option value="Proses">Proses</option>
             <option value="Approval">Approval</option>
-            <option value="Tanggal Foto">Tanggal Foto</option>
+            <option value="Tanggal Foto">Sesi Foto</option>
             <option value="Issued">Issued</option>
           </select>
         </div>
