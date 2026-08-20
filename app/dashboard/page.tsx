@@ -82,13 +82,6 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] border border-[#D4AF37]/20 rounded-2xl p-8 mb-8">
           <div className="flex items-center gap-4">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={50}
-              height={50}
-              className="object-contain"
-            />
             <div>
               <h1 className="text-2xl font-bold text-[#D4AF37] mb-2">
                 Selamat Datang, {session.user?.email}
